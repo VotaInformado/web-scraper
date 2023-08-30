@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.service import Service
 
 class Command(BaseCommand):
     help = "Deletes all folders from a given directory"
@@ -23,19 +24,23 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Create a new instance of the Chrome driver (you can replace this with Firefox or other browsers)
-        driver = webdriver.Chrome()  # Make sure you have the correct WebDriver executable path
-
+        service = Service(executable_path="./drivers/chromedriver")
+        driver = webdriver.Chrome(service=service)  # Make sure you have the correct WebDriver executable path
         # Navigate to the website
         driver.get("https://votaciones.hcdn.gob.ar/")
 
         try:
             # Click the dropdown button
             time.sleep(3)
-            dropdown_button = driver.find_element(By.CSS_SELECTOR, "button[data-id='select-ano']")
+            dropdown_button = driver.find_element(
+                By.CSS_SELECTOR, "button[data-id='select-ano']"
+            )
             dropdown_button.click()
             # Choose a specific year from the dropdown menu
             year = "2001"
-            year_option = driver.find_element(By.XPATH, f"//ul[contains(@class, 'inner')]//span[text()='{year}']")
+            year_option = driver.find_element(
+                By.XPATH, f"//ul[contains(@class, 'inner')]//span[text()='{year}']"
+            )
             year_option.click()
             time.sleep(3)
 
@@ -43,7 +48,9 @@ class Command(BaseCommand):
             self.click_show_more_button(driver)
 
             # Find all buttons with the text "Ver expedientes" and click on them
-            ver_expedientes_buttons = driver.find_elements(By.XPATH, "//a[text()='Ver expedientes']")
+            ver_expedientes_buttons = driver.find_elements(
+                By.XPATH, "//a[text()='Ver expedientes']"
+            )
             for button in ver_expedientes_buttons:
                 while True:
                     try:
@@ -55,7 +62,9 @@ class Command(BaseCommand):
                             continue
                         raise e
                 time.sleep(1)
-            import pdb; pdb.set_trace()
+            import pdb
+
+            pdb.set_trace()
             # Retrieve the resulting HTML content of the website
             result_html = driver.page_source
 

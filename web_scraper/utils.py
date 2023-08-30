@@ -1,5 +1,6 @@
 import time
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,7 +9,6 @@ from web_scraper.custom_logger import CustomLogger
 
 
 class Scraper:
-
     logger = CustomLogger()
 
     @classmethod
@@ -29,9 +29,14 @@ class Scraper:
     def scrape_page(cls, year="2023"):
         # Create a new instance of the Chrome driver (you can replace this with Firefox or other browsers)
         chrome_options = Options()
+        service = Service(executable_path="./drivers/chromedriver")
+        # get driver from drivers path
+        chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--headless")  # Enable headless mode
-        chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration in headless mode
-        driver = webdriver.Chrome(options=chrome_options)  # Make sure you have the correct WebDriver executable path
+        chrome_options.add_argument(
+            "--disable-gpu"
+        )  # Disable GPU acceleration in headless mode
+        driver = webdriver.Chrome(service=service, options=chrome_options) 
 
         # Navigate to the website
         url = "https://votaciones.hcdn.gob.ar/"
@@ -41,10 +46,14 @@ class Scraper:
 
         try:
             # Click the dropdown button
-            dropdown_button = driver.find_element(By.CSS_SELECTOR, "button[data-id='select-ano']")
+            dropdown_button = driver.find_element(
+                By.CSS_SELECTOR, "button[data-id='select-ano']"
+            )
             dropdown_button.click()
             # Choose a specific year from the dropdown menu
-            year_option = driver.find_element(By.XPATH, f"//ul[contains(@class, 'inner')]//span[text()='{year}']")
+            year_option = driver.find_element(
+                By.XPATH, f"//ul[contains(@class, 'inner')]//span[text()='{year}']"
+            )
             year_option.click()
             cls.logger.info(f"Selecting year {year}...")
             time.sleep(3)
@@ -52,7 +61,9 @@ class Scraper:
             # Click the "Ver más" button until it disappears
             cls._click_show_more_button(driver)
 
-            ver_expedientes_buttons = driver.find_elements(By.XPATH, "//a[text()='Ver expedientes']")
+            ver_expedientes_buttons = driver.find_elements(
+                By.XPATH, "//a[text()='Ver expedientes']"
+            )
             cls.logger.info(f"Retrieved {len(ver_expedientes_buttons)} buttons...")
             for button in ver_expedientes_buttons:
                 while True:
